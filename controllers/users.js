@@ -1,6 +1,7 @@
-const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
+const User = require('../models/user');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -16,7 +17,7 @@ const createUser = (req, res, next) => {
     .findOne({ email })
     .then((user) => {
       if (user) {
-        res.send({ message: "пользователь уже существует"});
+        res.send({ message: 'пользователь уже существует' });
       } else {
         bcrypt.hash(password, 10)
           .then((hash) => User.create({
@@ -32,13 +33,11 @@ const createUser = (req, res, next) => {
 
 // возвращает информацию о пользователе
 const getUser = (req, res, next) => {
-  console.log(req.user)
   User
     .findById(req.user._id)
     .then((user) => {
       if (!user) {
-        console.log(req.user)
-        res.send({ message: "пользователь не найден"});
+        res.send({ message: 'пользователь не найден' });
       }
       res.send({ user });
     })
@@ -52,15 +51,15 @@ const updateUser = (req, res, next) => {
     .findByIdAndUpdate(
       req.user._id,
       { email, password },
-        {
-          new: true,
-          runValidators: true,
-          upsert: false,
-        },
-      )
+      {
+        new: true,
+        runValidators: true,
+        upsert: false,
+      },
+    )
     .then((user) => {
       if (!user) {
-        res.send({ message: "пользователь не найден"});
+        res.send({ message: 'пользователь не найден' });
       }
       res.send({ user });
     })
@@ -81,14 +80,14 @@ const login = (req, res, next) => {
       res.send({ message: 'Все прошло успешно!' });
     })
     .catch(() => {
-      res.send({message: 'Неправильный email или пароль'});
-    });
+      res.send({ message: 'Неправильный email или пароль' });
+    })
+    .catch(next);
 };
-
 
 module.exports = {
   getUser,
   updateUser,
   createUser,
-  login
-}
+  login,
+};

@@ -1,15 +1,23 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const cors = require('cors');
 
-const { createUser, login } = require('./controllers/users');
-const auth = require('./middlewares/auth');
+const routes = require('./routes');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const error = require('./middlewares/errors');
+const origin = require('./utils/const');
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
+
+app.use('*', cors({ origin, credentials: true }));
+
+app.use(helmet());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,25 +26,15 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   useNewUrlParser: true,
 });
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-    name: Joi.string().min(2).max(30),
-  }),
-}), createUser);
+app.use(requestLogger);
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-  }),
-}), login);
+app.use(routes);
 
-app.use('/', auth, require('./routes/users'));
-
+app.use(errorLogger);
 app.use(errors());
+// app.use(error);
 
 app.listen(PORT, () => {
-    console.log(`App listening on port ${PORT}`)
-})
+  // eslint-disable-next-line no-console
+  console.log(`App listening on port ${PORT}`);
+});
