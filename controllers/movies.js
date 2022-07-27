@@ -1,15 +1,21 @@
 const Movie = require('../models/movie');
 
+const BadRequest = require('../errors/BadRequest');
+const NotFound = require('../errors/NotFound');
+const Forbidden = require('../errors/Forbidden');
+
 // возвращает сохранённые текущим пользователем фильмы
 const getMovies = (req, res, next) => {
+  const owner = req.user._id;
+
   Movie
-    .find(req.owner)
+    .find({ owner })
     .then((movies) => res.send(movies))
     .catch(next);
 };
 
 // создаёт фильм
-const createMovie = (req, res) => {
+const createMovie = (req, res, next) => {
   const {
     country,
     director,
@@ -41,7 +47,13 @@ const createMovie = (req, res) => {
       owner,
     })
     .then((movie) => res.send(movie))
-    .catch((err) => res.send({ err }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 // удаляет сохранённый фильм
@@ -50,14 +62,20 @@ const deleteMovie = (req, res, next) => {
     .findById(req.params._id)
     .then((movie) => {
       if (!movie) {
-        res.send({ message: 'Карточка не найдена' });
+        throw new NotFound('Такой фильм не найден');
       }
       if (movie.owner.toString() !== req.user._id) {
-        res.send({ message: 'Недостаточно прав для удаления карточки' });
+        throw new Forbidden('Недостаточно прав для удаления');
       }
-      Movie.findByIdAndRemove(req.params.id)
-        .then(() => res.send({ message: 'Карточка успешно удалена' }))
-        .catch(next);
+      Movie.findByIdAndRemove(req.params._id)
+        .then(() => res.send({ message: 'Фильм удален' }))
+        .catch((err) => {
+          if (err.name === 'CastError') {
+            next(new BadRequest('Переданы некорректные данные'));
+          } else {
+            next(err);
+          }
+        });
     });
 };
 

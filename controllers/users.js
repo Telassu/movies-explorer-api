@@ -2,6 +2,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const Conflict = require('../errors/Conflict');
+const BadRequest = require('../errors/BadRequest');
+const NotFound = require('../errors/NotFound');
+const Unauthorized = require('../errors/Unauthorized');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -17,7 +21,7 @@ const createUser = (req, res, next) => {
     .findOne({ email })
     .then((user) => {
       if (user) {
-        res.send({ message: 'пользователь уже существует' });
+        next(new Conflict(`Указанный email (${email}) уже существует`));
       } else {
         bcrypt.hash(password, 10)
           .then((hash) => User.create({
@@ -26,7 +30,13 @@ const createUser = (req, res, next) => {
             password: hash,
           }))
           .then(() => res.send({ name, email }))
-          .catch(next);
+          .catch((err) => {
+            if (err.name === 'ValidationError') {
+              next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+            } else {
+              next(err);
+            }
+          });
       }
     });
 };
@@ -37,7 +47,7 @@ const getUser = (req, res, next) => {
     .findById(req.user._id)
     .then((user) => {
       if (!user) {
-        res.send({ message: 'пользователь не найден' });
+        throw new NotFound('Увы, пользователя не существует');
       }
       res.send({ user });
     })
@@ -59,11 +69,17 @@ const updateUser = (req, res, next) => {
     )
     .then((user) => {
       if (!user) {
-        res.send({ message: 'пользователь не найден' });
+        throw new NotFound('Увы, пользователя не существует');
       }
       res.send({ user });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Переданы некорректные данные при редактировании пользователя'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 // аутентификация пользователя
@@ -80,9 +96,8 @@ const login = (req, res, next) => {
       res.send({ message: 'Все прошло успешно!' });
     })
     .catch(() => {
-      res.send({ message: 'Неправильный email или пароль' });
-    })
-    .catch(next);
+      next(new Unauthorized('Неправильный email или пароль'));
+    });
 };
 
 module.exports = {
