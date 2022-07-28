@@ -29,8 +29,8 @@ router.get('/signout', (req, res) => {
   res.clearCookie('jwt').send({ message: 'Выход' });
 });
 
-router.use((req, res, next) => {
-  next(new NotFound('Страница не найдена'));
+router.use('/*', () => {
+  throw new NotFound('Страница не найдена');
 });
 
 module.exports = router;
