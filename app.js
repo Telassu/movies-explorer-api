@@ -8,6 +8,7 @@ const cors = require('cors');
 
 const routes = require('./routes');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const limiter = require('./middlewares/rateLimiter');
 const origin = require('./utils/const');
 
 const { PORT = 3000, NODE_ENV, DB_CONNECT } = process.env;
@@ -17,7 +18,7 @@ const app = express();
 app.use('*', cors({ origin, credentials: true }));
 
 app.use(helmet());
-
+app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
