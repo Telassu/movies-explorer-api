@@ -4,6 +4,13 @@ const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Forbidden = require('../errors/Forbidden');
 
+const {
+  errRequest,
+  successfull,
+  errMovie,
+  errAccess,
+} = require('../utils/const');
+
 // возвращает сохранённые текущим пользователем фильмы
 const getMovies = (req, res, next) => {
   const owner = req.user._id;
@@ -49,7 +56,7 @@ const createMovie = (req, res, next) => {
     .then((movie) => res.send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные'));
+        next(new BadRequest(errRequest));
       } else {
         next(err);
       }
@@ -62,21 +69,22 @@ const deleteMovie = (req, res, next) => {
     .findById(req.params._id)
     .then((movie) => {
       if (!movie) {
-        throw new NotFound('Такой фильм не найден');
+        throw new NotFound(errMovie);
       }
       if (movie.owner.toString() !== req.user._id) {
-        throw new Forbidden('Недостаточно прав для удаления');
+        throw new Forbidden(errAccess);
       }
-      Movie.findByIdAndRemove(req.params._id)
-        .then(() => res.send({ message: 'Фильм удален' }))
+      Movie.remove()
+        .then(() => res.send({ message: successfull }))
         .catch((err) => {
           if (err.name === 'CastError') {
-            next(new BadRequest('Переданы некорректные данные'));
+            next(new BadRequest(errRequest));
           } else {
             next(err);
           }
         });
-    });
+    })
+    .catch(next);
 };
 
 module.exports = {

@@ -6,6 +6,13 @@ const Conflict = require('../errors/Conflict');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Unauthorized = require('../errors/Unauthorized');
+const {
+  errEmail,
+  errRequest,
+  errUser,
+  errReg,
+  successfull,
+} = require('../utils/const');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -21,7 +28,7 @@ const createUser = (req, res, next) => {
     .findOne({ email })
     .then((user) => {
       if (user) {
-        next(new Conflict(`Указанный email (${email}) уже существует`));
+        next(new Conflict(errEmail));
       } else {
         bcrypt.hash(password, 10)
           .then((hash) => User.create({
@@ -32,7 +39,7 @@ const createUser = (req, res, next) => {
           .then(() => res.send({ name, email }))
           .catch((err) => {
             if (err.name === 'ValidationError') {
-              next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+              next(new BadRequest(errRequest));
             } else {
               next(err);
             }
@@ -47,7 +54,7 @@ const getUser = (req, res, next) => {
     .findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFound('Увы, пользователя не существует');
+        throw new NotFound(errUser);
       }
       res.send({ user });
     })
@@ -56,11 +63,11 @@ const getUser = (req, res, next) => {
 
 // обновляет информацию о пользователе
 const updateUser = (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, name } = req.body;
   User
     .findByIdAndUpdate(
       req.user._id,
-      { email, password },
+      { email, name },
       {
         new: true,
         runValidators: true,
@@ -69,13 +76,16 @@ const updateUser = (req, res, next) => {
     )
     .then((user) => {
       if (!user) {
-        throw new NotFound('Увы, пользователя не существует');
+        throw new NotFound(errUser);
       }
       res.send({ user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные при редактировании пользователя'));
+        next(new BadRequest(errRequest));
+      }
+      if (err.code === 11000) {
+        next(new Conflict(errEmail));
       } else {
         next(err);
       }
@@ -93,10 +103,10 @@ const login = (req, res, next) => {
         maxAge: 360000 * 24 * 7,
         httpOnly: true,
       });
-      res.send({ message: 'Все прошло успешно!' });
+      res.send(successfull);
     })
     .catch(() => {
-      next(new Unauthorized('Неправильный email или пароль'));
+      next(new Unauthorized(errReg));
     });
 };
 
