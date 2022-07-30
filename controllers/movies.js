@@ -74,7 +74,7 @@ const deleteMovie = (req, res, next) => {
       if (movie.owner.toString() !== req.user._id) {
         throw new Forbidden(errAccess);
       }
-      Movie.remove()
+      movie.remove()
         .then(() => res.send({ message: successfull }))
         .catch((err) => {
           if (err.name === 'CastError') {

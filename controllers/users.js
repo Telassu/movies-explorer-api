@@ -45,7 +45,8 @@ const createUser = (req, res, next) => {
             }
           });
       }
-    });
+    })
+    .catch(next);
 };
 
 // возвращает информацию о пользователе
@@ -103,7 +104,7 @@ const login = (req, res, next) => {
         maxAge: 360000 * 24 * 7,
         httpOnly: true,
       });
-      res.send(successfull);
+      res.send({ message: successfull });
     })
     .catch(() => {
       next(new Unauthorized(errReg));
