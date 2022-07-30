@@ -3,7 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 
 const { getMovies, createMovie, deleteMovie } = require('../controllers/movies');
 
-const regex = require('../utils/const');
+const { regexUrl } = require('../utils/const');
 
 // возвращает все сохранённые текущим пользователем фильмы
 router.get('/movies', getMovies);
@@ -16,11 +16,11 @@ router.post('/movies', celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required().pattern(RegExp(regex)),
-    trailerLink: Joi.string().required().pattern(RegExp(regex)),
+    image: Joi.string().required().pattern(regexUrl),
+    trailerLink: Joi.string().required().pattern(regexUrl),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
-    thumbnail: Joi.string().required().pattern(RegExp(regex)),
+    thumbnail: Joi.string().required().pattern(regexUrl),
     movieId: Joi.number().required(),
   }),
 }), createMovie);
