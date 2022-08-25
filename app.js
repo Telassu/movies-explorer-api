@@ -10,11 +10,18 @@ const cookieParser = require('cookie-parser');
 const routes = require('./routes');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const limiter = require('./middlewares/rateLimiter');
-const { origin, mongodbAdress } = require('./utils/const');
+const { mongodbAdress } = require('./utils/const');
 const errorHandler = require('./middlewares/errorHandler');
 
 const options = {
-  origin,
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://api.chuhonina.cinema.nomoredomains.xyz',
+    'https://api.chuhonina.cinema.nomoredomains.xyz',
+    'http://chuhonina.cinema.nomoredomains.xyz',
+    'https://chuhonina.cinema.nomoredomains.xyz',
+  ],
   credentials: true,
 };
 const { PORT = 3001, NODE_ENV, DB_CONNECT } = process.env;
