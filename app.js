@@ -13,11 +13,15 @@ const limiter = require('./middlewares/rateLimiter');
 const { origin, mongodbAdress } = require('./utils/const');
 const errorHandler = require('./middlewares/errorHandler');
 
-const { PORT = 3000, NODE_ENV, DB_CONNECT } = process.env;
+const options = {
+  origin,
+  credentials: true,
+};
+const { PORT = 3001, NODE_ENV, DB_CONNECT } = process.env;
 
 const app = express();
 
-app.use('*', cors({ origin, credentials: true }));
+app.use('*', cors(options));
 
 app.use(helmet());
 app.use(bodyParser.json());
