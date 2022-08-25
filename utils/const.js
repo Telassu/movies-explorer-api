@@ -1,10 +1,10 @@
 const origin = [
   'http://localhost:3000',
   'http://localhost:3001',
-  //  'http://api.chuhonina.cinema.nomoredomains.xyz',
-  //  'https://api.chuhonina.cinema.nomoredomains.xyz',
-  //  'http://chuhonina.cinema.nomoredomains.xyz',
-  //  'https://chuhonina.cinema.nomoredomains.xyz',
+  'http://api.chuhonina.cinema.nomoredomains.xyz',
+  'https://api.chuhonina.cinema.nomoredomains.xyz',
+  'http://chuhonina.cinema.nomoredomains.xyz',
+  'https://chuhonina.cinema.nomoredomains.xyz',
 ];
 // сообщения
 const successfull = 'Все прошло успешно!';
