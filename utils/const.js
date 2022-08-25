@@ -1,8 +1,10 @@
-const corsOrigin = [
-  'http://api.chuhonina.cinema.nomoredomains.xyz',
-  'https://api.chuhonina.cinema.nomoredomains.xyz',
-  'http://chuhonina.cinema.nomoredomains.xyz',
-  'https://chuhonina.cinema.nomoredomains.xyz',
+const origin = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  //  'http://api.chuhonina.cinema.nomoredomains.xyz',
+  //  'https://api.chuhonina.cinema.nomoredomains.xyz',
+  //  'http://chuhonina.cinema.nomoredomains.xyz',
+  //  'https://chuhonina.cinema.nomoredomains.xyz',
 ];
 // сообщения
 const successfull = 'Все прошло успешно!';
@@ -22,7 +24,7 @@ const regexUrl = /(https?:\/\/)([www.]?[a-zA-Z0-9-]+\.)([^\s]{2,})/;
 const mongodbAdress = 'mongodb://localhost:27017/bitfilmsdb';
 
 module.exports = {
-  corsOrigin,
+  origin,
   regexUrl,
   errEmail,
   errServer,
